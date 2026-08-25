@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What'sThozhil — Multi-Tenant WhatsApp Cloud API Automation &amp; Lead Management | by Critictech</title>
+<meta name="description" content="What'sThozhil by Critictech is a multi-tenant WhatsApp Cloud API automation platform for businesses. Features include 24/7 auto-reply, lead capture, broadcast campaigns, and embedded signup.">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; background: #fff; line-height: 1.7; }
+
+:root {
+ --wa: #25D366; --wa-dark: #128C7E; --wa-darker: #075E54;
+ --wa-light: #e8f5e9; --wa-pale: #f0fdf4;
+ --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0;
+ --gray-300: #cbd5e1; --gray-400: #94a3b8; --gray-500: #64748b;
+ --gray-600: #475569; --gray-700: #334155; --gray-800: #1e293b;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* Navbar */
+.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.95); border-bottom: 1px solid var(--gray-200); height: 64px; }
+.nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--wa), var(--wa-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 1.1rem; }
+.nav-brand-name { font-size: 1.35rem; font-weight: 800; color: var(--gray-800); letter-spacing: -0.02em; }
+.nav-brand-by { font-size: 0.65rem; color: var(--gray-400); background: var(--gray-100); padding: 3px 8px; border-radius: 4px; font-weight: 500; letter-spacing: 0.03em; }
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-link { color: var(--gray-600); font-size: 0.9rem; font-weight: 500; padding: 8px 16px; border-radius: 8px; text-decoration: none; transition: all 0.2s; }
+.nav-link:hover { color: var(--gray-800); background: var(--gray-100); }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.nav-login { color: var(--gray-600); font-weight: 500; font-size: 0.9rem; padding: 8px 16px; text-decoration: none; border-radius: 8px; transition: color 0.2s; }
+.nav-login:hover { color: var(--gray-800); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; font-size: 0.95rem; font-weight: 600; border-radius: 10px; border: none; cursor: pointer; transition: all 0.3s; text-decoration: none; }
+.btn-primary { background: linear-gradient(135deg, var(--wa), var(--wa-dark)); color: #fff; box-shadow: 0 4px 14px rgba(37,211,102,0.35); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,211,102,0.45); }
+.btn-white { background: #fff; color: var(--wa-dark); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+.btn-white:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.btn-outline { background: transparent; color: var(--wa-dark); border: 1.5px solid var(--wa); }
+.btn-outline:hover { background: var(--wa-pale); }
+.btn-lg { padding: 14px 32px; font-size: 1.05rem; border-radius: 12px; }
+
+/* Hero */
+.hero { padding: 120px 0 80px; background: var(--wa-pale); }
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--wa-light); border: 1px solid var(--wa); color: var(--wa-dark); padding: 8px 16px; border-radius: 24px; font-size: 0.85rem; font-weight: 600; margin-bottom: 24px; }
+.hero h1 { font-size: clamp(2rem, 4vw, 3.25rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 20px; color: var(--gray-800); }
+.hero .highlight { color: var(--wa-dark); }
+.hero p { font-size: 1.15rem; color: var(--gray-500); margin-bottom: 32px; line-height: 1.8; }
+.hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-stats { display: flex; gap: 40px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--gray-200); }
+.stat-value { font-size: 1.75rem; font-weight: 800; color: var(--wa-dark); }
+.stat-label { font-size: 0.85rem; color: var(--gray-500); margin-top: 4px; }
+
+/* Dashboard Preview */
+.dash-preview { background: #fff; border-radius: 16px; border: 1px solid var(--gray-200); box-shadow: 0 20px 60px rgba(0,0,0,0.08); overflow: hidden; }
+.dash-header { padding: 12px 20px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 16px; }
+.dash-body { display: grid; grid-template-columns: 180px 1fr; min-height: 380px; }
+.dash-sidebar { padding: 16px; border-right: 1px solid var(--gray-200); }
+.dash-side-item { padding: 8px 12px; font-size: 0.85rem; color: var(--gray-500); border-radius: 8px; margin-bottom: 4px; }
+.dash-side-item.active { color: var(--wa-dark); background: var(--wa-pale); font-weight: 600; }
+.dash-content { padding: 20px; }
+.dash-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.dash-stat { background: var(--gray-50); border-radius: 12px; padding: 16px; }
+.dash-stat-label { font-size: 0.8rem; color: var(--gray-500); }
+.dash-stat-value { font-size: 1.5rem; font-weight: 700; color: var(--gray-800); margin-top: 4px; }
+.dash-chart { height: 60px; background: var(--wa-pale); border-radius: 8px; margin-top: 8px; }
+
+/* Conversation UI */
+.conv-ui { background: #111827; border-radius: 12px; overflow: hidden; }
+.conv-header { background: linear-gradient(135deg, #075e54, #128c7e); padding: 14px 20px; color: #fff; display: flex; align-items: center; gap: 12px; }
+.conv-ai-header { background: linear-gradient(135deg, var(--wa-darker), var(--wa-dark)); padding: 12px 20px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+.conv-messages { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.conv-msg { display: flex; gap: 12px; }
+.conv-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--wa); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+.conv-name { font-size: 0.8rem; font-weight: 600; color: #4ade80; margin-bottom: 4px; }
+.conv-text { font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 12px; border-top-left-radius: 0; }
+.conv-ai-box { background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.2); border-radius: 12px; padding: 14px; }
+.conv-ai-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--wa); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; }
+.conv-ai-btn { background: var(--wa); color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; border: none; cursor: pointer; }
+.conv-typing { display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 0.8rem; padding: 4px 0; }
+.conv-typing-dot { width: 5px; height: 5px; background: #64748b; border-radius: 50%; animation: pulse 1.4s infinite; }
+
+/* Sections */
+.section { padding: 80px 0; }
+.section-white { background: #fff; }
+.section-gray { background: var(--gray-50); }
+.section-green { background: var(--wa-pale); }
+.section-label { display: inline-block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--wa-dark); margin-bottom: 16px; }
+.section-header { text-align: center; max-width: 650px; margin: 0 auto 48px; }
+.section-header h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 700; line-height: 1.2; color: var(--gray-800); margin-bottom: 16px; }
+.section-header p { color: var(--gray-500); font-size: 1.05rem; line-height: 1.7; }
+.highlight { color: var(--wa-dark); }
+
+/* Features */
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+.feature-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 16px; padding: 28px; transition: all 0.3s; }
+.feature-card:hover { border-color: var(--wa); box-shadow: 0 8px 30px rgba(37,211,102,0.1); transform: translateY(-4px); }
+.feature-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--wa-pale); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 1.5rem; }
+.feature-card h3 { font-size: 1.15rem; font-weight: 600; color: var(--gray-800); margin-bottom: 8px; }
+.feature-card p { font-size: 0.95rem; color: var(--gray-500); line-height: 1.7; }
+
+/* AI Feature */
+.ai-feature { background: var(--wa-pale); border: 1px solid var(--wa-light); border-radius: 20px; padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.ai-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--wa); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 16px; }
+.ai-feature h3 { font-size: 1.5rem; font-weight: 700; color: var(--wa-dark); margin-bottom: 16px; }
+.ai-feature p { color: var(--gray-600); font-size: 1.05rem; line-height: 1.7; margin-bottom: 24px; }
+.ai-check { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.ai-check-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--wa); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+.ai-check span { color: var(--gray-700); font-size: 0.95rem; }
+
+/* Workflow */
+.workflow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.step { text-align: center; }
+.step-number { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--wa), var(--wa-dark)); color: #fff; }
+.step h3 { font-size: 1.15rem; font-weight: 600; color: var(--gray-800); margin-bottom: 8px; }
+.step p { font-size: 0.95rem; color: var(--gray-500); line-height: 1.7; }
+
+/* Integrations */
+.integrations-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto; }
+.integration { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; }
+.integration-dot { width: 8px; height: 8px; background: var(--wa); border-radius: 50%; box-shadow: 0 0 6px var(--wa); flex-shrink: 0; }
+.integration-name { font-size: 0.9rem; font-weight: 600; color: var(--wa-dark); }
+.integration-type { font-size: 0.75rem; color: var(--gray-500); }
+
+/* Pricing */
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
+.pricing-card { background: #fff; border: 2px solid var(--gray-200); border-radius: 16px; padding: 32px; transition: all 0.3s; position: relative; }
+.pricing-card.featured { border-color: var(--wa); box-shadow: 0 12px 40px rgba(37,211,102,0.12); }
+.pricing-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--wa), var(--wa-dark)); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 4px 16px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+.pricing-name { font-size: 1.25rem; font-weight: 700; color: var(--gray-800); margin-bottom: 8px; }
+.pricing-desc { font-size: 0.9rem; color: var(--gray-500); margin-bottom: 20px; line-height: 1.6; }
+.pricing-amount { font-size: 2.5rem; font-weight: 800; color: var(--wa-dark); margin-bottom: 24px; }
+.pricing-amount span { font-size: 1rem; font-weight: 500; color: var(--gray-500); }
+.pricing-features { list-style: none; margin-bottom: 24px; }
+.pricing-features li { padding: 8px 0; color: var(--gray-600); font-size: 0.95rem; border-bottom: 1px solid var(--gray-100); }
+.pricing-features li:last-child { border: none; }
+
+/* CTA */
+.cta { background: linear-gradient(135deg, var(--wa-darker), var(--wa-dark)); color: #fff; text-align: center; padding: 80px 0; position: relative; overflow: hidden; }
+.cta h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 700; margin-bottom: 16px; position: relative; z-index: 1; }
+.cta p { color: rgba(255,255,255,0.85); font-size: 1.1rem; max-width: 600px; margin: 0 auto 32px; position: relative; z-index: 1; }
+
+/* Legal Section */
+.legal { background: #fff; }
+.legal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1000px; margin: 0 auto; }
+.legal-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 16px; padding: 32px; }
+.legal-card h3 { font-size: 1.15rem; font-weight: 700; color: var(--wa-dark); margin-bottom: 16px; }
+.legal-card p { font-size: 0.9rem; color: var(--gray-600); line-height: 1.7; margin-bottom: 12px; }
+.legal-card ul { list-style: none; padding: 0; }
+.legal-card ul li { padding: 6px 0; font-size: 0.9rem; color: var(--gray-600); }
+.legal-card ul li::before { content: "• "; color: var(--wa); font-weight: 700; }
+
+/* Footer */
+.footer { background: var(--wa-darker); color: var(--gray-400); padding: 64px 0 32px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+.footer-brand { font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+.footer-desc { font-size: 0.9rem; line-height: 1.7; max-width: 300px; margin-bottom: 20px; }
+.footer h4 { color: #fff; font-size: 0.85rem; font-weight: 600; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 10px; }
+.footer-link { color: var(--gray-400); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+.footer-link:hover { color: var(--wa); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; margin-top: 48px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; }
+.footer-contact { margin-top: 16px; }
+.footer-contact a { color: var(--wa); text-decoration: none; font-size: 0.9rem; }
+.footer-contact a:hover { text-decoration: underline; }
+
+@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+@media (max-width: 768px) {
+ .nav-links { display: none; }
+ .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+ .hero { padding: 100px 0 60px; }
+ .ai-feature { grid-template-columns: 1fr; }
+ .workflow { grid-template-columns: 1fr; }
+ .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+ .footer-grid { grid-template-columns: 1fr 1fr; }
+ .footer-bottom { flex-direction: column; text-align: center; }
+ .legal-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+ <div class="nav-inner">
+ <a href="#" class="nav-brand">
+ <div class="nav-brand-icon">W</div>
+ <div>
+ <div class="nav-brand-name">What'sThozhil</div>
+ </div>
+ <div class="nav-brand-by">by Critictech</div>
+ </a>
+ <div class="nav-links">
+ <a href="#features" class="nav-link">Features</a>
+ <a href="#how-it-works" class="nav-link">How It Works</a>
+ <a href="#integrations" class="nav-link">Integrations</a>
+ <a href="#pricing" class="nav-link">Pricing</a>
+ <a href="#legal" class="nav-link">Legal</a>
+ </div>
+ <div class="nav-actions">
+ <a href="#" class="nav-login">Login</a>
+ <a href="#" class="btn btn-primary">Get Started Free</a>
+ </div>
+ </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+ <div class="container">
+ <div class="hero-grid">
+ <div>
+ <div class="hero-badge">
+ <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+ Cloud API Integration
+ </div>
+ <h1>Multi-Tenant WhatsApp Automation &amp; <span class="highlight">Lead Management</span></h1>
+ <p>Scale your business communication with AI-powered auto-replies, automated lead capture, broadcast campaigns, and seamless multi-tenant account management — all powered by the official WhatsApp Cloud API.</p>
+ <div class="hero-cta">
+ <a href="#" class="btn btn-primary btn-lg">Start Free Trial →</a>
+ <a href="#how-it-works" class="btn btn-white btn-lg">See How It Works</a>
+ </div>
+ <div class="hero-stats">
+ <div>
+ <div class="stat-value">10M+</div>
+ <div class="stat-label">Messages Monthly</div>
+ </div>
+ <div>
+ <div class="stat-value">500+</div>
+ <div class="stat-label">Businesses Trust Us</div>
+ </div>
+ <div>
+ <div class="stat-value">99.9%</div>
+ <div class="stat-label">Uptime SLA</div>
+ </div>
+ </div>
+ </div>
+ <div>
+ <div class="dash-preview">
+ <div class="dash-header">
+ <div style="display:flex;gap:6px">
+ <div style="width:12px;height:12px;border-radius:50%;background:#ef4444"></div>
+ <div style="width:12px;height:12px;border-radius:50%;background:#f59e0b"></div>
+ <div style="width:12px;height:12px;border-radius:50%;background:#22c55e"></div>
+ </div>
+ <div style="flex:1;text-align:center;font-size:0.85rem;color:var(--gray-500);font-weight:500">What'sThozhil Dashboard</div>
+ </div>
+ <div class="dash-body">
+ <div class="dash-sidebar">
+ <div class="dash-side-item active">📊 Dashboard</div>
+ <div class="dash-side-item">💬 Conversations</div>
+ <div class="dash-side-item">🤖 Auto Reply</div>
+ <div class="dash-side-item">📈 Leads</div>
+ <div class="dash-side-item">📢 Broadcasts</div>
+ <div class="dash-side-item">👥 Tenants</div>
+ <div class="dash-side-item">⚙️ Settings</div>
+ </div>
+ <div class="dash-content">
+ <div class="dash-stats">
+ <div class="dash-stat">
+ <div class="dash-stat-label">Active Conversations</div>
+ <div class="dash-stat-value">1,284</div>
+ <div class="dash-chart"></div>
+ </div>
+ <div class="dash-stat">
+ <div class="dash-stat-label">Leads Captured Today</div>
+ <div class="dash-stat-value">342</div>
+ <div class="dash-chart" style="background:var(--wa-light)"></div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="section section-white">
+ <div class="container">
+ <div class="section-header">
+ <div class="section-label">Features</div>
+ <h2>Everything you need to <span class="highlight">automate &amp; grow</span></h2>
+ <p>Powerful features designed to help you manage conversations, capture leads, and scale your business communication effortlessly.</p>
+ </div>
+ <div class="features-grid">
+ <div class="feature-card">
+ <div class="feature-icon">⚡</div>
+ <h3>24/7 Instant Auto Reply</h3>
+ <p>Never miss a customer message. Set up intelligent auto-replies that respond instantly to WhatsApp and Instagram messages around the clock, even when your team is offline.</p>
+ </div>
+ <div class="feature-card">
+ <div class="feature-icon">🎯</div>
+ <h3>Automated Lead Capture</h3>
+ <p>Capture and qualify leads directly from conversations. Every inquiry is logged, tagged, and routed to your dashboard automatically so no potential customer slips away.</p>
+ </div>
+ <div class="feature-card">
+ <div class="feature-icon">📢</div>
+ <h3>Broadcast Campaigns</h3>
+ <p>Reach thousands of customers with personalized broadcast messages. Schedule campaigns, track delivery, and measure engagement — all from one platform.</p>
+ </div>
+ <div class="feature-card">
+ <div class="feature-icon">🏢</div>
+ <h3>Multi-Tenant Account Connection</h3>
+ <p>Built-in Embedded Signup lets your clients connect their own WhatsApp Business accounts in minutes. Manage multiple clients from a single dashboard with full data isolation.</p>
+ </div>
+ <div class="feature-card">
+ <div class="feature-icon">🤖</div>
+ <h3>AI-Powered Responses</h3>
+ <p>Generate intelligent, context-aware responses in real-time. Our AI learns your business context and maintains your brand voice across all conversations.</p>
+ </div>
+ <div class="feature-card">
+ <div class="feature-icon">🔒</div>
+ <h3>Enterprise Security</h3>
+ <p>Bank-grade encryption, SOC 2 Type II compliance, and role-based access control. Multi-tenant architecture ensures client data isolation at every layer.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- AI Feature Highlight -->
+<section class="section section-green">
+ <div class="container">
+ <div class="ai-feature">
+ <div>
+ <div class="ai-badge">✨ AI-Powered</div>
+ <h3>Intelligent responses that sound exactly like you</h3>
+ <p>Our AI learns from your past conversations and brand guidelines to generate responses that maintain your unique voice. Review, edit, and send with confidence — or let it handle routine queries automatically.</p>
+ <div class="ai-check">
+ <div class="ai-check-icon">✓</div>
+ <span>Context-aware responses</span>
+ </div>
+ <div class="ai-check">
+ <div class="ai-check-icon">✓</div>
+ <span>Multi-language support</span>
+ </div>
+ <div class="ai-check">
+ <div class="ai-check-icon">✓</div>
+ <span>Brand voice learning</span>
+ </div>
+ </div>
+ <div class="conv-ui">
+ <div class="conv-header">
+ <div class="conv-avatar" style="background:#fff;color:var(--wa-darker)">AI</div>
+ <div>
+ <div style="font-weight:700;font-size:0.95rem">AI Assistant</div>
+ <div style="font-size:0.75rem;opacity:0.85">Responding to customer</div>
+ </div>
+ </div>
+ <div class="conv-ai-header">
+ <span style="font-weight:600;font-size:0.9rem">Drafting response...</span>
+ <span style="font-size:0.75rem;opacity:0.8">Review before sending</span>
+ </div>
+ <div class="conv-messages">
+ <div class="conv-msg">
+ <div class="conv-avatar">C</div>
+ <div class="conv-text">
+ <div class="conv-name">Customer</div>
+ Hi, I'd like to know more about your enterprise pricing options. We're a team of 50 and looking to scale our customer support.
+ </div>
+ </div>
+ <div class="conv-ai-box">
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+ <span class="conv-ai-tag">✨ AI Generated</span>
+ <button class="conv-ai-btn">✓ Use</button>
+ </div>
+ <div style="font-size:0.85rem;color:var(--gray-300);line-height:1.5">
+ Hi there! Thank you for your interest in our enterprise plan. For a team of 50, our Enterprise package would be perfect — it includes unlimited agents, advanced AI features, and dedicated support. I'd love to schedule a quick call to discuss your specific needs. Would tomorrow at 2 PM work for you?
+ </div>
+ </div>
+ <div class="conv-typing">
+ Customer is typing
+ <span class="conv-typing-dot" style="animation-delay:0s"></span>
+ <span class="conv-typing-dot" style="animation-delay:0.2s"></span>
+ <span class="conv-typing-dot" style="animation-delay:0.4s"></span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- How It Works -->
+<section id="how-it-works" class="section section-white">
+ <div class="container">
+ <div class="section-header">
+ <div class="section-label">How It Works</div>
+ <h2>Get started in <span class="highlight">three simple steps</span></h2>
+ <p>Setting up What'sThozhil takes minutes, not weeks. Here's how to get your team communicating smarter.</p>
+ </div>
+ <div class="workflow">
+ <div class="step">
+ <div class="step-number">1</div>
+ <h3>Connect Your Channels</h3>
+ <p>Link your WhatsApp Business API, Instagram, and other channels in just a few clicks. Use our Embedded Signup to connect accounts in minutes.</p>
+ </div>
+ <div class="step">
+ <div class="step-number">2</div>
+ <h3>Configure Automation</h3>
+ <p>Set up AI auto-replies, lead capture rules, broadcast workflows, and team assignments. Our AI learns your business context automatically.</p>
+ </div>
+ <div class="step">
+ <div class="step-number">3</div>
+ <h3>Start Converting</h3>
+ <p>Begin managing conversations with AI assistance. Track leads, optimize responses, and scale your team's impact across all connected accounts.</p>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- Integrations -->
+<section id="integrations" class="section section-gray">
+ <div class="container">
+ <div class="section-header">
+ <div class="section-label">Integrations</div>
+ <h2>Works with your <span class="highlight">favorite tools</span></h2>
+ <p>Connect with the tools your team already uses. Built on official Meta Cloud APIs for reliable, compliant messaging.</p>
+ </div>
+ <div class="integrations-grid">
+ <div class="integration">
+ <div class="integration-dot"></div>
+ <div>
+ <div class="integration-name">WhatsApp Cloud API</div>
+ <div class="integration-type">Cloud API Integration</div>
+ </div>
+ </div>
+ <div class="integration">
+ <div class="integration-dot"></div>
+ <div>
+ <div class="integration-name">Instagram Messaging</div>
+ <div class="integration-type">Direct Messaging API</div>
+ </div>
+ </div>
+ <div class="integration">
+ <div class="integration-dot"></div>
+ <div>
+ <div class="integration-name">Shopify</div>
+ <div class="integration-type">E-commerce Integration</div>
+ </div>
+ </div>
+ <div class="integration">
+ <div class="integration-dot"></div>
+ <div>
+ <div class="integration-name">HubSpot</div>
+ <div class="integration-type">CRM Integration</div>
+ </div>
+ </div>
+ <div class="integration">
+ <div class="integration-dot"></div>
+ <div>
+ <div class="integration-name">Zapier</div>
+ <div class="integration-type">Automation Integration</div>
+ </div>
+ </div>
+ <div class="integration">
+ <div class="integration-dot"></div>
+ <div>
+ <div class="integration-name">Salesforce</div>
+ <div class="integration-type">CRM Integration</div>
+ </div>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="section section-white">
+ <div class="container">
+ <div class="section-header">
+ <div class="section-label">Pricing</div>
+ <h2>Simple, transparent <span class="highlight">pricing</span></h2>
+ <p>Choose the plan that fits your business. All plans include a 14-day free trial with full access.</p>
+ </div>
+ <div class="pricing-grid">
+ <div class="pricing-card">
+ <h3 class="pricing-name">Starter</h3>
+ <p class="pricing-desc">Perfect for small businesses getting started with automated messaging and lead capture.</p>
+ <div class="pricing-amount">$49<span>/month</span></div>
+ <ul class="pricing-features">
+ <li>1 Business Account</li>
+ <li>1,000 Messages/Month</li>
+ <li>Basic Auto Reply</li>
+ <li>Lead Capture Dashboard</li>
+ <li>Email Support</li>
+ </ul>
+ <a href="#" class="btn btn-outline" style="width:100%;justify-content:center">Start Free Trial</a>
+ </div>
+ <div class="pricing-card featured">
+ <div class="pricing-badge">Most Popular</div>
+ <h3 class="pricing-name">Professional</h3>
+ <p class="pricing-desc">For growing teams that need advanced features, broadcast campaigns, and higher limits.</p>
+ <div class="pricing-amount">$149<span>/month</span></div>
+ <ul class="pricing-features">
+ <li>5 Business Accounts</li>
+ <li>10,000 Messages/Month</li>
+ <li>Advanced AI Responses</li>
+ <li>Broadcast Campaigns</li>
+ <li>Multi-Tenant Dashboard</li>
+ <li>Priority Support</li>
+ </ul>
+ <a href="#" class="btn btn-primary" style="width:100%;justify-content:center">Start Free Trial</a>
+ </div>
+ <div class="pricing-card">
+ <h3 class="pricing-name">Enterprise</h3>
+ <p class="pricing-desc">For large organizations with custom needs, dedicated infrastructure, and white-label options.</p>
+ <div class="pricing-amount">Custom</div>
+ <ul class="pricing-features">
+ <li>Unlimited Accounts</li>
+ <li>Unlimited Messages</li>
+ <li>Custom AI Training</li>
+ <li>White-Label Options</li>
+ <li>Dedicated Infrastructure</li>
+ <li>24/7 Dedicated Support</li>
+ </ul>
+ <a href="#" class="btn btn-outline" style="width:100%;justify-content:center">Contact Sales</a>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+ <div class="container">
+ <h2>Ready to transform your business communication?</h2>
+ <p>Join 500+ businesses already using What'sThozhil to automate, scale, and delight their customers with WhatsApp Cloud API automation.</p>
+ <a href="#" class="btn btn-white btn-lg">Start Your Free Trial →</a>
+ </div>
+</section>
+
+<!-- Legal Section -->
+<section id="legal" class="section legal">
+ <div class="container">
+ <div class="section-header">
+ <div class="section-label">Legal</div>
+ <h2>Privacy Policy &amp; <span class="highlight">Terms of Service</span></h2>
+ <p>Transparent policies to protect your business and your customers.</p>
+ </div>
+ <div class="legal-grid">
+ <div class="legal-card">
+ <h3>Privacy Policy</h3>
+ <p>Critictech Solutions ("we", "our", or "us") operates the What'sThozhil platform, a multi-tenant communication software solution. This policy outlines how we collect, use, and protect your data.</p>
+ <ul>
+ <li>We provide multi-tenant communication software via official Meta Cloud APIs</li>
+ <li>Client data is isolated per tenant using industry-standard separation practices</li>
+ <li>All data transmissions are encrypted using TLS 1.2+</li>
+ <li>We do not sell or share client data with third parties</li>
+ <li>Data retention follows client configuration and applicable regulations</li>
+ <li>Clients can request data deletion at any time</li>
+ </ul>
+ </div>
+ <div class="legal-card">
+ <h3>Terms of Service</h3>
+ <p>By using What'sThozhil, you agree to the following terms governing your use of our multi-tenant WhatsApp Cloud API automation platform.</p>
+ <ul>
+ <li>Service is provided via official Meta Cloud API and Direct Messaging API integrations</li>
+ <li>Clients must comply with Meta's WhatsApp Business Policy and Terms</li>
+ <li>Account credentials and API keys must be kept secure by each tenant</li>
+ <li>Service uptime target is 99.9% per our Service Level Agreement</li>
+ <li>Cancellation and refund policies apply per selected plan</li>
+ <li>Critictech is not liable for third-party API changes by Meta Platforms</li>
+ </ul>
+ </div>
+ </div>
+ </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+ <div class="container">
+ <div class="footer-grid">
+ <div>
+ <div class="footer-brand">What'sThozhil</div>
+ <p class="footer-desc">Multi-tenant WhatsApp Cloud API automation &amp; lead management platform. Built by Critictech Solutions.</p>
+ <div class="footer-contact">
+ <p style="font-size:0.85rem;color:var(--gray-400);margin-bottom:8px">Contact us:</p>
+ <a href="mailto:support@critictech.com">support@critictech.com</a><br>
+ <span style="font-size:0.85rem;color:var(--gray-400)">Critictech Solutions</span>
+ </div>
+ </div>
+ <div>
+ <h4>Product</h4>
+ <ul class="footer-links">
+ <li><a href="#features" class="footer-link">Features</a></li>
+ <li><a href="#pricing" class="footer-link">Pricing</a></li>
+ <li><a href="#integrations" class="footer-link">Integrations</a></li>
+ <li><a href="#" class="footer-link">Changelog</a></li>
+ </ul>
+ </div>
+ <div>
+ <h4>Company</h4>
+ <ul class="footer-links">
+ <li><a href="#" class="footer-link">About Us</a></li>
+ <li><a href="#" class="footer-link">Blog</a></li>
+ <li><a href="#" class="footer-link">Careers</a></li>
+ <li><a href="mailto:support@critictech.com" class="footer-link">Contact</a></li>
+ </ul>
+ </div>
+ <div>
+ <h4>Support</h4>
+ <ul class="footer-links">
+ <li><a href="#" class="footer-link">Help Center</a></li>
+ <li><a href="#" class="footer-link">Documentation</a></li>
+ <li><a href="#" class="footer-link">API Reference</a></li>
+ <li><a href="#" class="footer-link">Status</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <div>© 2026 What'sThozhil by Critictech Solutions. All rights reserved.</div>
+ <div style="display:flex;gap:24px">
+ <a href="#legal" class="footer-link">Privacy Policy</a>
+ <a href="#legal" class="footer-link">Terms of Service</a>
+ <a href="#" class="footer-link">Cookie Policy</a>
+ </div>
+ </div>
+ </div>
+</footer>
+
+</body>
+</html>
